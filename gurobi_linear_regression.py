@@ -40,8 +40,8 @@ regression = LinearRegression()
 pipe = make_pipeline(scaler, regression)
 print("version 13 executed")
 # print(dataSetOne.loc[:, features], dataSetOne.loc[:, target])
-pipe.fit(X=dataSetOne.loc[features],
-         y=dataSetOne.loc[target])
+pipe.fit(X=np.array(dataSetOne[features]).reshape(-1, 1),
+         y=np.array(dataSetOne[target]).reshape(-1, 1))
 
 print("fetted model")
 # Start with classical part of the model
