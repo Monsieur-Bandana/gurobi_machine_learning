@@ -49,16 +49,16 @@ m = gp.Model()
 print("created model")
 # The y variables are modeling the probability of enrollment of each student. They are indexed by students data
 y = gppd.add_vars(m, dataSetTwo, name='satisfactory', lb=0.0, ub=100.0)
+print(dataSetTwo)
 print("explained y")
 # We add to studentsdata a column of variables to model the "merit" feature. Those variable are between 0 and 2.5.
 # They are added directly to the data frame using the gppd extension.
-dataSetTwo = dataSetTwo.gppd.add_vars(m, lb=100.0, name=features)
+dataSetTwo = dataSetTwo.gppd.add_vars(m, name=features)
 print("modeled price")
 # We denote by x the (variable) "merit" feature
-x = dataSetTwo[features]
+x = np.array(dataSetTwo[features]).reshape(-1, 1)
 print("created x")
-# Make sure that studentsdata contains only the features column and in the right order
-dataSetTwo = dataSetTwo.loc[:, features]
+
 
 m.update()
 print("updated model")
