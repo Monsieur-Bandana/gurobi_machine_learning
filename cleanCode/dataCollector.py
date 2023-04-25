@@ -62,6 +62,9 @@ def get_time_of_first_max_supply(player):
     return maxSec
 
 
+dataset = []
+
+
 def forEachReplay(replay):
 
     for player in replay.players:
@@ -90,17 +93,16 @@ def forEachReplay(replay):
 """
 
 
-dataset = []
 step = 0
 
 
-for replay in sc2reader.load_replays("./replays/firstRun"):
+for replay in sc2reader.load_replays("./replays/testRun"):
     forEachReplay(replay)
     step = step + 1
     print("step {} of {}".format(step, 822))
 
 finaldata = pd.DataFrame(dataset).to_csv(
-    "../csv_dateien/sc2allShort.csv", header=["player", "total_workers", "total_army", "fraction", "winner", "replay_filename"])
+    "./csv_dateien/sc2allShort.csv", header=["player", "total_workers", "total_army", "fraction", "winner", "replay_filename"])
 
 print(finaldata)
 
