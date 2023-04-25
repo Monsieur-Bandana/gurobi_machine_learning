@@ -28,12 +28,12 @@ def formatReplay(replay):
 
 def main():
     sc2 = SC2Factory()
-    replayUrl = "csv_dateien/ggtracker_2868002.SC2Replay"
+    replayUrl = "replays/firstRun/0dffaad1493241d3a281cbd1085c3bb6.SC2Replay"
     replay = sc2.load_replay(replayUrl)
     print(formatReplay(replay))
     print(formatTeams(replay))
     print("test")
-    print(replay.players)
+    print(replay.filename)
 
 
 if __name__ == "__main__":

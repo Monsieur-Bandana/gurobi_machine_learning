@@ -26,6 +26,7 @@ length_of_game = replay.frames // 24
 workers_1 = [worker_counter(replay, k, 1) for k in range(length_of_game)]
 workers_2 = [worker_counter(replay, k, 2) for k in range(length_of_game)]
 
+
 plt.figure()
 plt.plot(workers_1, label=replay.players[0])
 plt.plot(workers_2, label=replay.players[1])

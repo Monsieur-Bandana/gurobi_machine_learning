@@ -14,45 +14,59 @@ replay = sc2reader.load_replay(
 
 
 def worker_counter(replay, second, player_id):
-    workers = []
+    workers = 0
+
     for event in replay.events:
         if event.name == "UnitBornEvent" and event.control_pid == player_id:
+
             if event.unit.is_worker:
-                workers.append(event.unit)
+                workers = workers + 1
 
         if event.name == "UnitDiedEvent":
-            if event.unit in workers:
-                workers.remove(event.unit)
+
+            if event.unit.is_worker:
+                workers = workers - 1
 
         if event.second > second:
             break
 
-    return len(workers)
+    return workers
+
+
+def army_counter(replay, second, player_id):
+
+    marines = 0
+    for event in replay.events:
+        if event.name == "UnitBornEvent" and event.control_pid == player_id:
+            if (event.unit.is_army):
+                marines = marines + 1
+
+        if event.second > second:
+            break
+
+    return marines
 
 
 def marines_counter(replay, second, player_id):
-    workers = []
+
+    marines = 0
     for event in replay.events:
         if event.name == "UnitBornEvent" and event.control_pid == player_id:
             if (event.unit.name == "Marine"):
-                workers.append(event.unit)
-
-        if event.name == "UnitDiedEvent":
-            if event.unit in workers:
-                workers.remove(event.unit)
+                marines = marines + 1
 
         if event.second > second:
             break
 
-    return len(workers)
+    return marines
 
 
 def forEachReplay(replay):
 
     for player in replay.players:
-        if ((str(player.pick_race[0]) == "T") & (str(player) in str(replay.winner))):
-            workers = worker_counter(replay, 300, player.pid)
-            marines = marines_counter(replay, 300, player.pid)
+        if ((str(player) in str(replay.winner))):
+            workers = worker_counter(replay, 600, player.pid)
+            marines = army_counter(replay, 600, player.pid)
 
             dataset.append([player.name, workers, marines])
         """
@@ -70,10 +84,10 @@ step = 0
 for replay in sc2reader.load_replays("replays/firstRun"):
     forEachReplay(replay)
     step = step + 1
-    print("step {} of {}".format(step, 421))
+    print("step {} of {}".format(step, 341))
 
 finaldata = pd.DataFrame(dataset).to_csv(
-    "csv_dateien/sc.csv", header=["player", "total_workers", "total_marines"])
+    "csv_dateien/sc2.csv", header=["player", "total_workers", "total_marines"])
 
 print(finaldata)
 
