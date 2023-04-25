@@ -4,13 +4,22 @@ import shutil
 
 dataset = []
 
-"""
 
+def unit_counter(replay, second, player_id):
+    workers = []
+    for event in replay.events:
+        if event.name == "UnitBornEvent" and event.control_pid == player_id:
 
-replay = sc2reader.load_replay(
-    "replays/0dffaad1493241d3a281cbd1085c3bb6.SC2Replay")
+            workers.append(event.unit)
 
-"""
+        if event.name == "UnitDiedEvent":
+
+            workers.remove(event.unit)
+
+        if event.second > second:
+            break
+
+    return workers
 
 
 def worker_counter(replay, second, player_id):
@@ -47,12 +56,47 @@ def marines_counter(replay, second, player_id):
     return len(workers)
 
 
+def total_unit_counter(replay, second, player_id):
+    units = []
+    for event in replay.events:
+        if event.name == "UnitBornEvent" and event.control_pid == player_id:
+
+            units.append(event.unit)
+
+        if event.name == "UnitDiedEvent":
+            if event.unit in units:
+                units.remove(event.unit)
+
+        if event.second > second:
+            break
+
+    return len(units)
+
+
+def get_time_of_first_max_supply(player):
+    length_of_game = replay.frames // 24
+    units_1 = [total_unit_counter(replay, k, player.pid)
+               for k in range(length_of_game)]
+
+    maxunits = 0
+    second = 0
+    maxSec = 0
+    for unitcount in units_1:
+        if unitcount > maxunits:
+            maxunits = unitcount
+            maxSec = second
+        second = second + 1
+
+    return maxSec
+
+
 def forEachReplay(replay):
 
     for player in replay.players:
         if ((str(player.pick_race[0]) == "T") & (str(player) in str(replay.winner))):
-            workers = worker_counter(replay, 300, player.pid)
-            marines = marines_counter(replay, 300, player.pid)
+            time = get_time_of_first_max_supply(player)
+            workers = worker_counter(replay, time, player.pid)
+            marines = marines_counter(replay, time, player.pid)
 
             dataset.append([player.name, workers, marines])
         """

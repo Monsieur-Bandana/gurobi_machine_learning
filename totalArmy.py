@@ -13,7 +13,7 @@ replay = sc2reader.load_replay(
 """
 
 
-def worker_counter(replay, player_id):
+def worker_counter(replay, second, player_id):
     workers = []
     for event in replay.events:
         if event.name == "UnitBornEvent" and event.control_pid == player_id:
@@ -24,10 +24,13 @@ def worker_counter(replay, player_id):
             if event.unit in workers:
                 workers.remove(event.unit)
 
+        if event.second > second:
+            break
+
     return len(workers)
 
 
-def marines_counter(replay, player_id):
+def marines_counter(replay, second, player_id):
     workers = []
     for event in replay.events:
         if event.name == "UnitBornEvent" and event.control_pid == player_id:
@@ -38,15 +41,53 @@ def marines_counter(replay, player_id):
             if event.unit in workers:
                 workers.remove(event.unit)
 
+        if event.second > second:
+            break
+
     return len(workers)
+
+
+def total_unit_counter(replay, second, player_id):
+    units = []
+    for event in replay.events:
+        if event.name == "UnitBornEvent" and event.control_pid == player_id:
+
+            units.append(event.unit)
+
+        if event.name == "UnitDiedEvent":
+            if event.unit in units:
+                units.remove(event.unit)
+
+        if event.second > second:
+            break
+
+    return len(units)
+
+
+def get_time_of_first_max_supply(player):
+    length_of_game = replay.frames // 24
+    units_1 = [total_unit_counter(replay, k, player.pid)
+               for k in range(length_of_game)]
+
+    maxunits = 0
+    second = 0
+    maxSec = 0
+    for unitcount in units_1:
+        if unitcount > maxunits:
+            maxunits = unitcount
+            maxSec = second
+        second = second + 1
+
+    return maxSec
 
 
 def forEachReplay(replay):
 
     for player in replay.players:
-        if ((str(player.pick_race[0]) == "T") & (str(player) in str(replay.winner))):
-            workers = worker_counter(replay, player.pid)
-            marines = marines_counter(replay, player.pid)
+        if ((str(player.pick_race[0]) == "Z") & (str(player) in str(replay.winner))):
+            time = get_time_of_first_max_supply(player)
+            workers = worker_counter(replay, time, player.pid)
+            marines = marines_counter(replay, time, player.pid)
 
             dataset.append([player.name, workers, marines])
         """
@@ -67,7 +108,7 @@ for replay in sc2reader.load_replays("replays/firstRun"):
     print("step {} of {}".format(step, 421))
 
 finaldata = pd.DataFrame(dataset).to_csv(
-    "csv_dateien/sc2.csv", header=["player", "total_workers", "total_marines"])
+    "csv_dateien/sc2zerg.csv", header=["player", "total_workers", "total_marines"])
 
 print(finaldata)
 
