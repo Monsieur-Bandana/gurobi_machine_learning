@@ -18,6 +18,10 @@ y_examples = y[index]
 
 m = gp.Model()
 
+print(X_examples)
+
+print(y_examples)
+
 input_vars = m.addMVar(X_examples.shape, lb=X_examples-0.2, ub=X_examples+0.2)
 output_vars = m.addMVar(y_examples.shape, lb=-gp.GRB.INFINITY)
 

@@ -1,4 +1,3 @@
-import os
 import sc2reader
 import pandas as pd
 import shutil
@@ -26,7 +25,7 @@ def counter(replay, second, player_id):
         if event.second > second:
             break
 
-    return [len(workers), armyValue, len(army)]
+    return [len(workers), armyValue]
 
 
 def total_unit_counter(replay, second, player_id):
@@ -60,7 +59,7 @@ def get_time_of_first_max_supply(player):
             maxSec = second
         second = second + 1
 
-    return [maxSec, maxunits]
+    return maxSec
 
 
 dataset = []
@@ -69,19 +68,17 @@ dataset = []
 def forEachReplay(replay):
 
     for player in replay.players:
-     #   if (str(player.pick_race[0]) == "T"):
-        firstLoop = get_time_of_first_max_supply(player)
-        time = firstLoop[0]
+     #   if (str(player.pick_race[0]) == "Z"):
+        time = get_time_of_first_max_supply(player)
         units = counter(replay, time, player.pid)
         workers = units[0]
-        armyValue = units[1]
-        unitsNr = units[2]
+        army = units[1]
         fraction = str(player.pick_race[0])
         winner = 0
         if str(player) in str(replay.winner):
             winner = 1
 
-        dataset.append([player.name, workers, armyValue, unitsNr, time,
+        dataset.append([player.name, workers, army,
                        fraction, winner, replay.filename])
 
 
@@ -97,16 +94,15 @@ def forEachReplay(replay):
 
 
 step = 0
-replayUrl = "replays/2ndRun"
 
-for replay in sc2reader.load_replays(replayUrl):
 
+for replay in sc2reader.load_replays("./replays/testRun"):
     forEachReplay(replay)
     step = step + 1
-    print("step {} of {}".format(step, len(os.listdir(replayUrl))))
+    print("step {} of {}".format(step, 822))
 
 finaldata = pd.DataFrame(dataset).to_csv(
-    "csv_dateien/starcraftFinalcsvs/2ndRun.csv", header=["player", "total_workers", "total_army_value", "total_army", "time", "fraction", "winner", "replay_filename"])
+    "./csv_dateien/sc2allShort.csv", header=["player", "total_workers", "total_army", "fraction", "winner", "replay_filename"])
 
 print(finaldata)
 
