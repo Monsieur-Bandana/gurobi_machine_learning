@@ -9,6 +9,9 @@ def counter(replay, second, player_id):
     army = []
     armyValue = 0
     for event in replay.events:
+        if event.name == "PlayerStatsEvent":
+            print("{} => {}".format(event.pid, event.name))
+
         if event.name == "UnitBornEvent" and event.control_pid == player_id:
             if event.unit.is_worker:
                 workers.append(event.unit)
@@ -97,7 +100,7 @@ def forEachReplay(replay):
 
 
 step = 0
-replayUrl = "replays/2ndRun"
+replayUrl = "replays/testRun"
 
 for replay in sc2reader.load_replays(replayUrl):
 
@@ -106,7 +109,7 @@ for replay in sc2reader.load_replays(replayUrl):
     print("step {} of {}".format(step, len(os.listdir(replayUrl))))
 
 finaldata = pd.DataFrame(dataset).to_csv(
-    "csv_dateien/starcraftFinalcsvs/2ndRun.csv", header=["player", "total_workers", "total_army_value", "total_army", "time", "fraction", "winner", "replay_filename"])
+    "csv_dateien/starcraftFinalcsvs/testRun.csv", header=["player", "total_workers", "total_army_value", "total_army", "time", "fraction", "winner", "replay_filename"])
 
 print(finaldata)
 

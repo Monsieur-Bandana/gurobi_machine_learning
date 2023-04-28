@@ -67,7 +67,8 @@ dataset = []
 
 
 def forEachReplay(replay):
-
+    players = []
+    armymax = []
     for player in replay.players:
      #   if (str(player.pick_race[0]) == "T"):
         firstLoop = get_time_of_first_max_supply(player)
@@ -75,14 +76,29 @@ def forEachReplay(replay):
         units = counter(replay, time, player.pid)
         workers = units[0]
         armyValue = units[1]
+        armymax.append(armyValue/time)
         unitsNr = units[2]
         fraction = str(player.pick_race[0])
         winner = 0
         if str(player) in str(replay.winner):
             winner = 1
-
-        dataset.append([player.name, workers, armyValue, unitsNr, time,
+        players.append([player.name, workers, armyValue, unitsNr, time,
                        fraction, winner, replay.filename])
+
+    maxV = 0
+    loopStart = 0
+    pitch = 0
+    for x in armymax:
+        if x > maxV:
+            maxV = x
+            pitch = loopStart
+        loopStart = loopStart + 1
+
+    players[pitch].append(1)
+    for player in players:
+        if len(player) < 9:
+            player.append(0)
+        dataset.append(player)
 
 
 """
@@ -97,7 +113,7 @@ def forEachReplay(replay):
 
 
 step = 0
-replayUrl = "replays/2ndRun"
+replayUrl = "replays/testRun"
 
 for replay in sc2reader.load_replays(replayUrl):
 
@@ -106,7 +122,7 @@ for replay in sc2reader.load_replays(replayUrl):
     print("step {} of {}".format(step, len(os.listdir(replayUrl))))
 
 finaldata = pd.DataFrame(dataset).to_csv(
-    "csv_dateien/starcraftFinalcsvs/2ndRun.csv", header=["player", "total_workers", "total_army_value", "total_army", "time", "fraction", "winner", "replay_filename"])
+    "csv_dateien/starcraftFinalcsvs/testRun.csv", header=["player", "total_workers", "total_army_value", "total_army", "time", "fraction", "winner", "replay_filename", "greater_army"])
 
 print(finaldata)
 
