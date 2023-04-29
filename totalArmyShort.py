@@ -9,8 +9,6 @@ def counter(replay, second, player_id):
     army = []
     armyValue = 0
     for event in replay.events:
-        if event.name == "PlayerStatsEvent":
-            print("{} => {}".format(event.pid, event.name))
 
         if event.name == "UnitBornEvent" and event.control_pid == player_id:
             if event.unit.is_worker:
