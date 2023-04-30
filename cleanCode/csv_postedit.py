@@ -3,10 +3,10 @@ import numpy as np
 
 # die vier in csv_create entstandenen Datensätze werden zu einem gestacked
 
-df1 = pd.read_csv('./csv_dateien/starcraftFinalcsvs/1stRun.csv')
-df2 = pd.read_csv('./csv_dateien/starcraftFinalcsvs/2ndRun.csv')
-df3 = pd.read_csv('./csv_dateien/starcraftFinalcsvs/3rdRun.csv')
-df4 = pd.read_csv('./csv_dateien/starcraftFinalcsvs/4thRun.csv')
+df1 = pd.read_csv('./csv_dateien/starcraftFinalcsvs/1stRunSup.csv')
+df2 = pd.read_csv('./csv_dateien/starcraftFinalcsvs/2ndRunSup.csv')
+df3 = pd.read_csv('./csv_dateien/starcraftFinalcsvs/3rdRunSup.csv')
+df4 = pd.read_csv('./csv_dateien/starcraftFinalcsvs/4thRunSup.csv')
 
 df = pd.concat([df1, df2, df3, df4])
 
@@ -24,6 +24,6 @@ values = ["Protoss", "Terraner", "Zerg"]
 df["fraction"] = np.select(conditions, values)
 
 # Durch die Konkardination und die Umbenennungen sind ungewünschte Spalten entstanden
-df = df.drop(columns=["Unnamed: 0", "Unnamed: 0.2", "Unnamed: 0.1"])
+df = df.drop(columns=["Unnamed: 0"])
 
-df.to_csv('./csv_dateien/starcraftFinalcsvs/stackedRun.csv')
+df.to_csv('./csv_dateien/starcraftFinalcsvs/stackedRunSup.csv')
