@@ -7,8 +7,8 @@ df1 = pd.read_csv('./csv_dateien/starcraftFinalcsvs/1stRunSup.csv')
 df2 = pd.read_csv('./csv_dateien/starcraftFinalcsvs/2ndRunSup.csv')
 df3 = pd.read_csv('./csv_dateien/starcraftFinalcsvs/3rdRunSup.csv')
 df4 = pd.read_csv('./csv_dateien/starcraftFinalcsvs/4thRunSup.csv')
-
-df = pd.concat([df1, df2, df3, df4])
+df5 = pd.read_csv('./csv_dateien/starcraftFinalcsvs/5thRunSup.csv')
+df = pd.concat([df1, df2, df3, df4, df5])
 
 # Fraktionskürzel durch echte Bezeichnung ersetzen
 # Es hat sich als effizienter herausgestellt es im Nachhinein über pandas zu bearbeiten, als direkt während des csv create Prozesses
