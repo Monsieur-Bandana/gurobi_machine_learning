@@ -3,18 +3,31 @@ import sc2reader
 import pandas as pd
 import shutil
 
+# Hier werden sämtliche "Events" einer Replaydatei innerhalb eines zeitlich festgelegten Rahmens. In diesem Fall handelt es sich bei den Events um die Zahl gesammelter Ressourcen,
+# die Zahl hergestellter Worker Units und Army Units. Die Army und Worker Units werden in eine Liste gelegt. Stirbt die Unit bis zum gewählten Zeitpunkt, wird sie wieder aus
+# der Liste entfernt
+
 
 def counter(replay, second, player_id):
     workers = []
     army = []
     armyValue = 0
+    armySupply = 0
+    collectedMinerals = 0
+    supply = 0
     for event in replay.events:
+
+        if event.name == "PlayerStatsEvent" and player_id == event.pid:
+            supply = event.food_made
+            collectedMinerals = collectedMinerals + \
+                event.minerals_current + event.vespene_current
         if event.name == "UnitBornEvent" and event.control_pid == player_id:
             if event.unit.is_worker:
                 workers.append(event.unit)
             if event.unit.is_army:
                 army.append(event.unit)
                 armyValue = armyValue + event.unit.minerals + event.unit.vespene
+                armySupply = armySupply + event.unit.supply
 
         if event.name == "UnitDiedEvent":
             if event.unit in workers:
@@ -22,11 +35,15 @@ def counter(replay, second, player_id):
             if event.unit in army:
                 army.remove(event.unit)
                 armyValue = armyValue - event.unit.minerals - event.unit.vespene
-
+                armySupply = armySupply - event.unit.supply
         if event.second > second:
             break
 
-    return [len(workers), armyValue, len(army)]
+    return [len(workers), armyValue, armySupply, collectedMinerals, supply]
+
+# Diese Schleife zählt alle Einheiten die ein Spieler in einer Partie produziert hat. Zuvor wurden sowohl diese Schleifentätigkeit,
+# als auch die vorhergehende in derselben Schleife erledigt, Es wurde aberfestgestellt, dass das Programm schneller ist, wenn man diese
+# und die vorhergehende Schleife voneinander trennt.
 
 
 def total_unit_counter(replay, second, player_id):
@@ -44,6 +61,8 @@ def total_unit_counter(replay, second, player_id):
             break
 
     return len(units)
+
+# Diese Schleife iteriert durch jedes Sekunde einer Partie und stellt fest, zu welchem Zeitpunkt ein Spieler seine größte Armee hat
 
 
 def get_time_of_first_max_supply(player):
@@ -63,80 +82,50 @@ def get_time_of_first_max_supply(player):
     return [maxSec, maxunits]
 
 
-dataset = []
+# dataset = []
 
 
-def forEachReplay(replay):
-    players = []
-    armymax = []
+def forEachReplay(df, replay):
+
     for player in replay.players:
-     #   if (str(player.pick_race[0]) == "T"):
-        firstLoop = get_time_of_first_max_supply(player)
-        time = firstLoop[0]
-        units = counter(replay, time, player.pid)
-        workers = units[0]
-        armyValue = units[1]
-        armymax.append(armyValue/time)
-        unitsNr = units[2]
-        fraction = str(player.pick_race[0])
-        winner = 0
-        if str(player) in str(replay.winner):
-            winner = 1
-        players.append([player.name, workers, armyValue, unitsNr, time,
-                       fraction, winner, replay.filename])
+        if (str(player.pick_race[0]) == "T"):
+            try:
+                firstLoop = get_time_of_first_max_supply(player)
+                time = firstLoop[0]
+                units = counter(replay, time, player.pid)
+                workers = units[0]
+                armyValue = units[1]
+                unitsNr = units[2]
+                collectedMinerals = units[3]
+                supply = units[4]
+                fraction = str(player.pick_race[0])
+                winner = 0
+                if str(player) in str(replay.winner):
+                    winner = 1
 
-    maxV = 0
-    loopStart = 0
-    pitch = 0
-    for x in armymax:
-        if x > maxV:
-            maxV = x
-            pitch = loopStart
-        loopStart = loopStart + 1
-
-    players[pitch].append(1)
-    for player in players:
-        if len(player) < 9:
-            player.append(0)
-        dataset.append(player)
-
-
-"""
-        else:
-            src = str(replay.filename)
-            file = src.replace("replays/firstRun", "")
-            file = file.replace("`\`", "")
-            dest = str("replays/not_interesting/" + str(file))
-            print(file)
-            shutil.move(src, dest)
-"""
+                print(player.name)
+                list_row = [player.name, workers, collectedMinerals, armyValue, unitsNr, supply, time,
+                            fraction, winner, replay.filename]
+                df.loc[len(df)] = list_row
+            except:
+                continue
+            finally:
+                df.to_csv("csv_dateien/starcraftFinalcsvs/allRunsButOnlyTerran.csv", header=[
+                          "player", "total_workers", "resource_mining", "total_army_value", "total_army", "supply", "time", "fraction", "winner", "replay_filename"])
 
 
 step = 0
-replayUrl = "replays/testRun"
-
+# Die Replays wurden in Datenpakete aus ca. 400 Replays aufgeteilt. Die Url wird nach jedem Duchlauf händisch geändert. Ein Durchlauf dauert ca. 20 Minuten
+replayUrl = "replays/tsRun7"
+df = pd.read_csv("csv_dateien/starcraftFinalcsvs/allRunsButOnlyTerran.csv")
+df = df.drop(columns=["Unnamed: 0"])
 for replay in sc2reader.load_replays(replayUrl):
 
-    forEachReplay(replay)
+    forEachReplay(df, replay)
     step = step + 1
     print("step {} of {}".format(step, len(os.listdir(replayUrl))))
 
-finaldata = pd.DataFrame(dataset).to_csv(
-    "csv_dateien/starcraftFinalcsvs/testRun.csv", header=["player", "total_workers", "total_army_value", "total_army", "time", "fraction", "winner", "replay_filename", "greater_army"])
-
-print(finaldata)
-
 """
-
-
-marines_1 = [marines_counter(replay, k, 1) for k in range(300)]
-workers_2 = [worker_counter(replay, k, 2) for k in range(300)]
-marines_2 = [marines_counter(replay, k, 2) for k in range(300)]
-
-print("{} setzte {} worker und {} marines in den ersten 300 sekunden ein".format(
-    replay.players[0], workers_1[len(workers_1)-1], marines_1[len(marines_1)-1]))
-
-print("{} setzte {} worker und {} marines in den ersten 300 sekunden ein".format(
-    replay.players[1], workers_2[len(workers_2)-1], marines_2[len(marines_2)-1]))
-
+finaldata = pd.DataFrame(dataset).to_csv(
+    "csv_dateien/starcraftFinalcsvs/6thRunSup.csv", header=["player", "total_workers", "resource_mining", "total_army_value", "total_army", "supply", "time", "fraction", "winner", "replay_filename"])
 """
