@@ -82,50 +82,48 @@ def get_time_of_first_max_supply(player):
     return [maxSec, maxunits]
 
 
-# dataset = []
-
-
 def forEachReplay(df, replay):
 
     for player in replay.players:
-        if (str(player.pick_race[0]) == "T"):
-            try:
-                firstLoop = get_time_of_first_max_supply(player)
-                time = firstLoop[0]
-                units = counter(replay, time, player.pid)
-                workers = units[0]
-                armyValue = units[1]
-                unitsNr = units[2]
-                collectedMinerals = units[3]
-                supply = units[4]
-                fraction = str(player.pick_race[0])
-                winner = 0
-                if str(player) in str(replay.winner):
-                    winner = 1
+     #   if (str(player.pick_race[0]) == "T"):
+        try:
+            firstLoop = get_time_of_first_max_supply(player)
+            time = firstLoop[0]
+            units = counter(replay, time, player.pid)
+            workers = units[0]
+            armyValue = units[1]
+            unitsNr = units[2]
+            collectedMinerals = units[3]
+            supply = units[4]
+            fraction = str(player.pick_race[0])
+            winner = 0
+            if str(player) in str(replay.winner):
+                winner = 1
 
-                print(player.name)
-                list_row = [player.name, workers, collectedMinerals, armyValue, unitsNr, supply, time,
-                            fraction, winner, replay.filename]
-                df.loc[len(df)] = list_row
-            except:
-                continue
-            finally:
-                df.to_csv("csv_dateien/starcraftFinalcsvs/allRunsButOnlyTerran.csv", header=[
-                          "player", "total_workers", "resource_mining", "total_army_value", "total_army", "supply", "time", "fraction", "winner", "replay_filename"])
+            print(player.name)
+            list_row = [player.name, workers, collectedMinerals, armyValue, unitsNr, supply, time,
+                        fraction, winner, replay.filename]
+            df.loc[len(df)] = list_row
+        except:
+            continue
+        finally:
+            df.to_csv("cleanCode/allRunsAllFractions.csv", header=[
+                      "player", "total_workers", "resource_mining", "total_army_value", "total_army", "supply", "time", "fraction", "winner", "replay_filename"])
 
 
 step = 0
 # Die Replays wurden in Datenpakete aus ca. 400 Replays aufgeteilt. Die Url wird nach jedem Duchlauf händisch geändert. Ein Durchlauf dauert ca. 20 Minuten
-replayUrl = "replays/tsRun7"
-df = pd.read_csv("csv_dateien/starcraftFinalcsvs/allRunsButOnlyTerran.csv")
-df = df.drop(columns=["Unnamed: 0"])
+# replayUrl = "../replays/all"
+replayUrl = "replays/all"
+try:
+    df = pd.read_csv("cleanCode/allRunsAllFractions.csv")
+    df = df.drop(columns=["Unnamed: 0"])
+except:
+    df = pd.DataFrame(columns=["player", "total_workers", "resource_mining", "total_army_value",
+                      "total_army", "supply", "time", "fraction", "winner", "replay_filename"], data=[])
+
 for replay in sc2reader.load_replays(replayUrl):
 
     forEachReplay(df, replay)
     step = step + 1
     print("step {} of {}".format(step, len(os.listdir(replayUrl))))
-
-"""
-finaldata = pd.DataFrame(dataset).to_csv(
-    "csv_dateien/starcraftFinalcsvs/6thRunSup.csv", header=["player", "total_workers", "resource_mining", "total_army_value", "total_army", "supply", "time", "fraction", "winner", "replay_filename"])
-"""
