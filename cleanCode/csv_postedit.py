@@ -3,7 +3,7 @@ import numpy as np
 
 # die vier in csv_create entstandenen Datensätze werden zu einem gestacked
 
-df = pd.read_csv('cleanCode/allRUnsButOnlyTerran.csv')
+df = pd.read_csv('cleanCode/allRunsAllFractions.csv')
 
 
 # Fraktionskürzel durch echte Bezeichnung ersetzen
@@ -32,4 +32,4 @@ df["supply"] = np.select(conditions2, values2)
 # Durch die Konkardination und die Umbenennungen sind ungewünschte Spalten entstanden
 df = df.drop(columns=["Unnamed: 0"])
 
-df.to_csv('cleanCode/allRUnsButOnlyTerran.csv')
+df.to_csv('cleanCode/allRunsAllFractions.csv')
