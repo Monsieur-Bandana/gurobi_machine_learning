@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 
+# ACHTUNG: Dieses File nicht abspielen, da es sonst Werte aus der CSV Datei überschreibt
+
 # die vier in csv_create entstandenen Datensätze werden zu einem gestacked
 
 df = pd.read_csv('cleanCode/allRunsAllFractions.csv')
@@ -22,13 +24,9 @@ df["fraction"] = np.select(conditions, values)
 
 
 # sc2reader zählt supply über das erlaubte limit hinaus
-conditions2 = [
-    (df['supply'] > 200.0),
-]
+df.loc[df.supply > 200.0, 'supply'] = 200.0
 
-values2 = [200.0]
 
-df["supply"] = np.select(conditions2, values2)
 # Durch die Konkardination und die Umbenennungen sind ungewünschte Spalten entstanden
 df = df.drop(columns=["Unnamed: 0"])
 
